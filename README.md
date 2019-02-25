@@ -5,7 +5,10 @@ reform.py is a small tool which can be used for reformatting csv files. While it
 
 ## Usage
 ```
-Usage: reform.py [options]
+Usage: python3 reform.py [options]
+
+## License
+Please credit me when used somewhere elsee
 
 Options:
   -h, --help            show this help message and exit
