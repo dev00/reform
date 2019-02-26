@@ -50,17 +50,6 @@ def extract_datasets(xml_file):
                     if value.get('Name') == 'Einsinkweg':
                         dataset.update({ 'Einsinkweg_Min': value.get('Min')})
                         dataset.update({ 'Einsinkweg_Max': value.get('Max')})
-               # dataset = {
-               #         'Path': os.path.basename(xml_file),
-               #         'Maschine': child.attrib['Maschine'],
-               #         'Name': value.get('Name', ''),
-               #         'Value': value.get('Value', ''),
-               #         'bValue': value.get('bValue', ''),
-               #         'diValue': value.get('diValue', ''),
-               #         'Min': value.get('Min', ''),
-               #         'Max': value.get('Max', ''),
-               #         }
-               # dataset_list.append(dataset)
             dataset_list.append(dataset)
     return dataset_list
 
