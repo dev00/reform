@@ -10,11 +10,12 @@ relevant_machines = [
         'Schweissen_FOKO_3',
         'Schweissen_FOKO_4']
 
-fieldnames = ['Path','Maschine','Name','Value','bValue','diValue','Min','Max']
+fieldnames = ['Dateiname', 'Maschine', 'Einsinkweg', 'Spannungsspitzenwert', 'EffekitvSpannungswert', 'Stromwert', 'Schweisszeit', 'Fehler-Code', 'Schweissstation-Nr', 'Schweissprogramm-Nr', 'fortlaufender Schweisszaehler']
+
 
 parser = OptionParser()
 parser.add_option("-s", "--sourcedir", help="folder where the wsd files are stored", default=os.getcwd())
-parser.add_option("-o", "--output", help="Where the output should be written to", default=os.path.join(os.getcwd(), 'report.csv'))
+parser.add_option("-o", "--output", help="Where the output should be written to", default=os.path.join(os.getcwd()))
 
 (options, args) = parser.parse_args()
 
@@ -38,27 +39,56 @@ def extract_datasets(xml_file):
     dataset_list = [] 
     for child in root[1]:
         if child.attrib['Maschine'] in relevant_machines:
+            dataset = {
+                    'Dateiname': os.path.basename(xml_file),
+                    'Maschine': child.attrib['Maschine']
+                    }
+
             for value in child[0]:
-                dataset = {
-                        'Path': os.path.basename(xml_file),
-                        'Maschine': child.attrib['Maschine'],
-                        'Name': value.get('Name', ''),
-                        'Value': value.get('Value', ''),
-                        'bValue': value.get('bValue', ''),
-                        'diValue': value.get('diValue', ''),
-                        'Min': value.get('Min', ''),
-                        'Max': value.get('Max', ''),
-                        }
-                dataset_list.append(dataset)
+                if value.get('Value'):
+                    dataset.update({ value.get('Name'): value.get('Value')})
+               # dataset = {
+               #         'Path': os.path.basename(xml_file),
+               #         'Maschine': child.attrib['Maschine'],
+               #         'Name': value.get('Name', ''),
+               #         'Value': value.get('Value', ''),
+               #         'bValue': value.get('bValue', ''),
+               #         'diValue': value.get('diValue', ''),
+               #         'Min': value.get('Min', ''),
+               #         'Max': value.get('Max', ''),
+               #         }
+               # dataset_list.append(dataset)
+            dataset_list.append(dataset)
     return dataset_list
 
 records = []
+
 for file in file_list(work_path, file_ending):
     # append new records to the old ones
     records += extract_datasets(file)
 
-with open(report_file, 'w') as csvfile:
+# write all
+
+
+#fieldnames = records[0].keys()
+
+print(records[0])
+print(records[1])
+print(fieldnames)
+
+with open(os.path.join(report_file, 'report.csv'), 'w') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
     for record in records:
         writer.writerow(record)
+
+for machine in relevant_machines:
+    with open(os.path.join(report_file, (machine+'.csv')), 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for record in records:
+            if record.get('Maschine') == machine:
+                writer.writerow(record)
+
+
+        
