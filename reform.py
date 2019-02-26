@@ -10,7 +10,7 @@ relevant_machines = [
         'Schweissen_FOKO_3',
         'Schweissen_FOKO_4']
 
-fieldnames = ['Dateiname', 'Maschine', 'Einsinkweg', 'Spannungsspitzenwert', 'EffekitvSpannungswert', 'Stromwert', 'Schweisszeit', 'Fehler-Code', 'Schweissstation-Nr', 'Schweissprogramm-Nr', 'fortlaufender Schweisszaehler']
+fieldnames = ['Dateiname', 'Maschine', 'Einsinkweg_Min', 'Einsinkweg_Max', 'Einsinkweg', 'Spannungsspitzenwert', 'EffekitvSpannungswert', 'Stromwert', 'Schweisszeit', 'Fehler-Code', 'Schweissstation-Nr', 'Schweissprogramm-Nr', 'fortlaufender Schweisszaehler']
 
 
 parser = OptionParser()
@@ -47,6 +47,9 @@ def extract_datasets(xml_file):
             for value in child[0]:
                 if value.get('Value'):
                     dataset.update({ value.get('Name'): value.get('Value')})
+                    if value.get('Name') == 'Einsinkweg':
+                        dataset.update({ 'Einsinkweg_Min': value.get('Min')})
+                        dataset.update({ 'Einsinkweg_Max': value.get('Max')})
                # dataset = {
                #         'Path': os.path.basename(xml_file),
                #         'Maschine': child.attrib['Maschine'],
@@ -68,20 +71,13 @@ for file in file_list(work_path, file_ending):
     records += extract_datasets(file)
 
 # write all
-
-
-#fieldnames = records[0].keys()
-
-print(records[0])
-print(records[1])
-print(fieldnames)
-
 with open(os.path.join(report_file, 'report.csv'), 'w') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
     for record in records:
         writer.writerow(record)
 
+# write sorted by machine
 for machine in relevant_machines:
     with open(os.path.join(report_file, (machine+'.csv')), 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
